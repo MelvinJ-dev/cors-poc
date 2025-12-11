@@ -1,7 +1,8 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="utf-8"/>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CORS PoC</title>
 </head>
 <body>
@@ -12,31 +13,26 @@
 
 <script>
 document.getElementById('run').addEventListener('click', function() {
-  const out = (msg) => { document.getElementById('out').textContent += msg + "\n"; };
+    const print = (msg) => {
+        document.getElementById('out').textContent += msg + "\n";
+    };
 
-  var xhr = new XMLHttpRequest();
-  xhr.open("POST", "https://b.clarity.ms/collect", true);
-  xhr.withCredentials = true;
-  xhr.setRequestHeader("Content-Type", "text/plain");
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", "https://b.clarity.ms/collect", true);
+    xhr.withCredentials = true;
+    xhr.setRequestHeader("Content-Type", "text/plain");
 
-  xhr.onload = function () {
-    out("Status: " + xhr.status + " " + xhr.statusText);
-    try {
-      // Some servers return empty body; show raw responseText anyway
-      out("Response length: " + xhr.responseText.length);
-    } catch (e) {
-      out("Could not read response body: " + e);
-    }
-    // We cannot read response headers like ACAO from JS directly unless the server exposes them via Access-Control-Expose-Headers.
-    out("Check Network tab for response headers (Access-Control-Allow-Origin / Access-Control-Allow-Credentials).");
-  };
+    xhr.onload = function () {
+        print("Status: " + xhr.status + " " + xhr.statusText);
+        print("Response length: " + xhr.responseText.length);
+        print("Check Network tab for CORS headers.");
+    };
 
-  xhr.onerror = function () {
-    out("Network error or blocked by CORS.");
-  };
+    xhr.onerror = function () {
+        print("Network error or blocked by CORS.");
+    };
 
-  // Minimal payload — server may return 400 if it expects a specific binary format; that's OK for testing header reflection.
-  xhr.send("poc-test");
+    xhr.send("poc-test");
 });
 </script>
 </body>
