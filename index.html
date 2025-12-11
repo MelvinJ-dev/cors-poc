@@ -1,39 +1,98 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CORS PoC</title>
+<meta charset="UTF-8">
+<title>CORS Misconfiguration Tester</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+body {
+    background: #111;
+    color: #0f0;
+    font-family: Consolas, monospace;
+    padding: 20px;
+}
+input, select, button {
+    padding: 10px;
+    margin: 5px 0;
+    width: 100%;
+    background: #000;
+    color: #0f0;
+    border: 1px solid #0f0;
+}
+pre {
+    background: #000;
+    padding: 10px;
+    border: 1px solid #0f0;
+    overflow-x: auto;
+}
+</style>
 </head>
 <body>
-  <h2>CORS PoC - Test Only</h2>
-  <p>Only run against systems you own or have permission to test.</p>
-  <button id="run">Run PoC</button>
-  <pre id="out"></pre>
+
+<h2>CORS Misconfiguration Tester</h2>
+
+<label>Target URL:</label>
+<input id="url" type="text" placeholder="https://example.com/api">
+
+<label>Method:</label>
+<select id="method">
+    <option>GET</option>
+    <option>POST</option>
+</select>
+
+<label>Send credentials?</label>
+<select id="creds">
+    <option value="include">Yes (include cookies)</option>
+    <option value="omit">No</option>
+</select>
+
+<label>POST Body (optional):</label>
+<textarea id="postdata" rows="3" placeholder='{ "test": "poc" }'></textarea>
+
+<button onclick="runTest()">Run CORS Test</button>
+
+<h3>Response Headers:</h3>
+<pre id="headers"></pre>
+
+<h3>Body (if allowed by CORS):</h3>
+<pre id="body"></pre>
 
 <script>
-document.getElementById('run').addEventListener('click', function() {
-    const print = (msg) => {
-        document.getElementById('out').textContent += msg + "\n";
-    };
+function runTest() {
+    let url = document.getElementById("url").value;
+    let method = document.getElementById("method").value;
+    let creds = document.getElementById("creds").value;
+    let postdata = document.getElementById("postdata").value;
 
-    var xhr = new XMLHttpRequest();
-    xhr.open("POST", "https://b.clarity.ms/collect", true);
-    xhr.withCredentials = true;
-    xhr.setRequestHeader("Content-Type", "text/plain");
+    document.getElementById("headers").textContent = "Loading...";
+    document.getElementById("body").textContent = "";
 
-    xhr.onload = function () {
-        print("Status: " + xhr.status + " " + xhr.statusText);
-        print("Response length: " + xhr.responseText.length);
-        print("Check Network tab for CORS headers.");
-    };
+    fetch(url, {
+        method: method,
+        credentials: creds,
+        headers: { "Content-Type": "application/json" },
+        body: method === "POST" ? postdata : null
+    })
+    .then(async (res) => {
+        let hdr = "";
+        for (let [key, value] of res.headers.entries()) {
+            hdr += `${key}: ${value}\n`;
+        }
+        document.getElementById("headers").textContent = hdr;
 
-    xhr.onerror = function () {
-        print("Network error or blocked by CORS.");
-    };
-
-    xhr.send("poc-test");
-});
+        try {
+            let text = await res.text();
+            document.getElementById("body").textContent = text;
+        } catch {
+            document.getElementById("body").textContent = "[CORS BLOCKED]";
+        }
+    })
+    .catch(err => {
+        document.getElementById("headers").textContent = "REQUEST FAILED:\n" + err;
+    });
+}
 </script>
+
 </body>
 </html>
