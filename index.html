@@ -59,40 +59,20 @@ pre {
 <pre id="body"></pre>
 
 <script>
-function runTest() {
-    let url = document.getElementById("url").value;
-    let method = document.getElementById("method").value;
-    let creds = document.getElementById("creds").value;
-    let postdata = document.getElementById("postdata").value;
-
-    document.getElementById("headers").textContent = "Loading...";
-    document.getElementById("body").textContent = "";
-
-    fetch(url, {
-        method: method,
-        credentials: creds,
-        headers: { "Content-Type": "application/json" },
-        body: method === "POST" ? postdata : null
-    })
-    .then(async (res) => {
-        let hdr = "";
-        for (let [key, value] of res.headers.entries()) {
-            hdr += `${key}: ${value}\n`;
-        }
-        document.getElementById("headers").textContent = hdr;
-
-        try {
-            let text = await res.text();
-            document.getElementById("body").textContent = text;
-        } catch {
-            document.getElementById("body").textContent = "[CORS BLOCKED]";
-        }
-    })
-    .catch(err => {
-        document.getElementById("headers").textContent = "REQUEST FAILED:\n" + err;
-    });
-}
+fetch("https://www.viator.com/intake/v2/rum/events", {
+    method: "POST",
+    mode: "cors",
+    credentials: "include",
+    headers: {
+        "Content-Type": "application/x-ndjson"
+    },
+    body: "test"
+})
+.then(r => r.text())
+.then(t => console.log("SUCCESS:", t))
+.catch(e => console.log("BLOCKED:", e));
 </script>
+
 
 </body>
 </html>
